@@ -27,6 +27,27 @@ var app = (function () {
         };
     };
 
+    var drawPoints = function () {
+        let elements = [];
+        let canvas = document.getElementById("canvas");
+        elemLeft = canvas.offsetLeft + canvas.clientLeft,
+        elemTop = canvas.offsetTop + canvas.clientTop,
+        canvas.addEventListener('click', function(event) {
+                  var px = event.pageX - elemLeft;
+                  var py = event.pageY - elemTop;
+
+                  elements.forEach(function(element) {
+                            if (y > element.top && y < element.top + element.height
+                                      && x > element.left && x < element.left + element.width) {
+                                      alert('clicked an element');
+                            }
+                  });
+
+                  var pt=new Point(px,py);
+                  stompClient.send("/topic/newpoint", {}, JSON.stringify(pt)); ;
+        });
+  };
+
 
     var connectAndSubscribe = function () {
         console.info('Connecting to WS...');
@@ -37,11 +58,12 @@ var app = (function () {
         stompClient.connect({}, function (frame) {
             console.log('Connected: ' + frame);
             stompClient.subscribe('/topic/newpoint', function (eventbody) {
-                alert(eventbody.body);
-                let points = JSON.parse(eventbody.body);
+                //alert(eventbody.body);
+                let point = JSON.parse(eventbody.body);
+                var pt=new Point(point.x, point.y);
+                addPointToCanvas(pt);
             });
         });
-
     };
     
     
@@ -55,10 +77,8 @@ var app = (function () {
             connectAndSubscribe();
         },
 
-        publishPoint: function(){
-            let px = document.getElementById("x").value;
-            let py = document.getElementById("y").value;
-            var pt = new Point(px,py);
+        publishPoint: function(x,y){
+            var pt = new Point(x, y);
             console.info("publishing point at ("+ pt.x + ", " + pt.y + ")");
 
             //publicar el evento
