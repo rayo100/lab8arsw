@@ -7,7 +7,8 @@ var app = (function () {
         }        
     }
     
-    var stompClient = null;
+    //var stompClient = null;
+    let connection = null;
 
     var addPointToCanvas = function (point) {        
         var canvas = document.getElementById("canvas");
@@ -44,12 +45,13 @@ var app = (function () {
                   });
 
                   var pt=new Point(px,py);
-                  stompClient.send("/topic/newpoint", {}, JSON.stringify(pt)); ;
+                  stompClient.send(`/topic/newpoint.${connection}`, {}, JSON.stringify(pt)); ;
         });
   };
 
 
-    var connectAndSubscribe = function () {
+    var connectAndSubscribe = function (draw) {
+        connection = draw;
         console.info('Connecting to WS...');
         var socket = new SockJS('/stompendpoint');
         stompClient = Stomp.over(socket);
@@ -57,7 +59,7 @@ var app = (function () {
         //subscribe to /topic/newpoint when connections succeed
         stompClient.connect({}, function (frame) {
             console.log('Connected: ' + frame);
-            stompClient.subscribe('/topic/newpoint', function (eventbody) {
+            stompClient.subscribe(`/topic/newpoint.${connection}`, function (eventbody) {
                 //alert(eventbody.body);
                 let point = JSON.parse(eventbody.body);
                 var pt=new Point(point.x, point.y);
@@ -74,15 +76,24 @@ var app = (function () {
             var can = document.getElementById("canvas");
             
             //websocket connection
-            connectAndSubscribe();
+            //connectAndSubscribe();
+            drawPoints();
         },
 
-        publishPoint: function(x,y){
-            var pt = new Point(x, y);
+        subscribe: function () {
+            let draw = document.getElementById("draw").value;
+            connectAndSubscribe(draw);
+        },
+
+        publishPoint: function (){
+            let px = document.getElementById("x").value;
+            let py = document.getElementById("y").value;
+            var pt=new Point(px,py);
             console.info("publishing point at ("+ pt.x + ", " + pt.y + ")");
 
             //publicar el evento
-            stompClient.send("/topic/newpoint", {}, JSON.stringify(pt));
+            //stompClient.send("/topic/newpoint", {}, JSON.stringify(pt));
+            stompClient.send(`/topic/newpoint.${connection}`, {}, JSON.stringify(pt));
         },
 
         disconnect: function () {
