@@ -23,7 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <script src="/webjars/jquery/jquery.min.js"></script>
         <script src="/webjars/sockjs-client/sockjs.min.js"></script>
         <script src="/webjars/stomp-websocket/stomp.min.js"></script>
-        <script src="/app.js"></script>
         <link rel="stylesheet" href="/styles.css">
 
     </head>
@@ -38,8 +37,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             </div>
             <label> X:</label><input id="x" type="number"/>
             <label> Y:</label><input id="y" type="number"/>
-            <button onclick="app.publishPoint()">Send point</button>
+            <button onclick="app.publishPoint(document.getElementById('x').value,document.getElementById('y').value)">Enviar punto</button>
             <canvas id="canvas" width="800" height="600"></canvas>
         </div>
     </body>
+    <script src="/app.js"></script>
 </html>
